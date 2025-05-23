@@ -1,0 +1,29 @@
+
+name: Check PR Source Branch
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize] 
+
+jobs:
+  check_source:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check if PR is to master from develop
+      run: |
+        # Pega o nome da branch base (destino do PR)
+        BASE_BRANCH="${{ github.base_ref }}"
+        # Pega o nome da branch head (origem do PR)
+        HEAD_BRANCH="${{ github.head_ref }}"
+
+        echo "Base branch: $BASE_BRANCH"
+        echo "Head branch: $HEAD_BRANCH"
+
+        # Verifica se a branch base é 'master' E a branch head NÃO é 'develop'
+        if [[ "$BASE_BRANCH" == "master" && "$HEAD_BRANCH" != "develop" ]]; then
+          echo "::error::Pull requests to 'master' must originate ONLY from the 'develop' branch. Please close this PR and open one from 'develop'."
+          exit 1 # Falha o job
+        else
+          echo "PR source branch check passed."
+        fi
